@@ -1,24 +1,11 @@
-import FormBuilder from "./components/FormBuilder";
-import type { FormFieldType } from "./Types/formBuilder";
+import UserRegistrationForm from "./examples/UserRegistrationForm";
 
 function App() {
-  const formFields: FormFieldType[] = [
-    {
-      name: "name",
-      label: "Name",
-      type: "number",
-    },
-  ];
-
-  return (
-    <div className="text-3xl font-bold underline">
-      <FormBuilder
-        formFields={formFields}
-        initialValues={{}}
-        onSubmit={() => {}}
-      />
-    </div>
-  );
+    return (
+        <div className="min-h-screen bg-gray-100 py-8">
+            <UserRegistrationForm />
+        </div>
+    );
 }
 
 export default App;

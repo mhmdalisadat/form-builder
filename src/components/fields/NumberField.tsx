@@ -1,79 +1,80 @@
 import React from "react";
-import { type FieldProps, Field } from "formik";
+import type { NumberFieldType } from "../../Types/fields.types";
 
-export interface NumberFieldProps {
-  name: string;
-  label?: string;
-  placeholder?: string;
-  required?: boolean;
-  disabled?: boolean;
-  min?: number;
-  max?: number;
-  step?: number;
-  className?: string;
-  labelClassName?: string;
-  inputClassName?: string;
-  errorClassName?: string;
+interface NumberFieldProps extends NumberFieldType {
+  value?: number;
+  error?: string;
 }
 
 const NumberField: React.FC<NumberFieldProps> = ({
   name,
   label,
   placeholder,
-  required = false,
   disabled = false,
+  required = false,
+  value,
+  error,
   min,
   max,
   step,
   className = "",
-  labelClassName = "",
-  inputClassName = "",
-  errorClassName = "",
+  onChange,
+  onBlur,
+  onFocus,
+  validation,
 }) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value === "" ? undefined : Number(e.target.value);
+    onChange?.(newValue);
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const value = e.target.value === "" ? undefined : Number(e.target.value);
+    onBlur?.(value);
+  };
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    const value = e.target.value === "" ? undefined : Number(e.target.value);
+    onFocus?.(value);
+  };
+
   return (
-    <Field name={name}>
-      {({ field, meta }: FieldProps) => (
-        <div className={`mb-4 ${className}`}>
-          {label && (
-            <label
-              htmlFor={name}
-              className={`block text-sm font-medium text-gray-700 mb-2 ${labelClassName}`}
-            >
-              {label}
-              {required && <span className="text-red-500 ml-1">*</span>}
-            </label>
-          )}
+    <div className={`form-field ${className}`}>
+      <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">
+        {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
+      </label>
 
-          <input
-            id={name}
-            type="number"
-            placeholder={placeholder}
-            disabled={disabled}
-            min={min}
-            max={max}
-            step={step}
-            className={`
-              w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
-              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-              disabled:bg-gray-100 disabled:cursor-not-allowed
-              ${
-                meta.touched && meta.error
-                  ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                  : ""
-              }
-              ${inputClassName}
-            `}
-            {...field}
-          />
+      <input
+        id={name}
+        name={name}
+        type="number"
+        value={value ?? ""}
+        placeholder={placeholder}
+        disabled={disabled}
+        required={required}
+        min={min ?? validation?.min}
+        max={max ?? validation?.max}
+        step={step}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        onFocus={handleFocus}
+        className={`
+          w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+          ${error ? "border-red-500" : "border-gray-300"}
+          ${disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white"}
+        `}
+        aria-describedby={error ? `${name}-error` : undefined}
+      />
 
-          {meta.touched && meta.error && (
-            <p className={`mt-1 text-sm text-red-600 ${errorClassName}`}>
-              {meta.error}
-            </p>
-          )}
-        </div>
+      {error && (
+        <p id={`${name}-error`} className="mt-1 text-sm text-red-600">
+          {error}
+        </p>
       )}
-    </Field>
+
+      {validation?.message && !error && <p className="mt-1 text-sm text-gray-500">{validation.message}</p>}
+    </div>
   );
 };
 

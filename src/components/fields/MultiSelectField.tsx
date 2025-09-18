@@ -1,21 +1,21 @@
 import React, { useState } from "react";
-import type { SelectFieldType } from "../../Types/fields.types";
+import type { MultiSelectFieldType } from "../../Types/fields.types";
 
-interface SelectFieldProps extends SelectFieldType {
-  value?: string | number;
+interface MultiSelectFieldProps extends MultiSelectFieldType {
+  value?: any[];
   error?: string;
 }
 
-const SelectField: React.FC<SelectFieldProps> = ({
+const MultiSelectField: React.FC<MultiSelectFieldProps> = ({
   name,
   label,
   placeholder = "انتخاب کنید...",
   disabled = false,
   required = false,
-  value,
+  value = [],
   error,
   options = [],
-  multiple = false,
+  maxSelect,
   searchable = false,
   className = "",
   onChange,
@@ -30,27 +30,29 @@ const SelectField: React.FC<SelectFieldProps> = ({
     ? options.filter((option) => option.label.toLowerCase().includes(searchTerm.toLowerCase()))
     : options;
 
-  const selectedOption = options.find((option) => option.value === value);
-  const selectedOptions = multiple
-    ? options.filter((option) => Array.isArray(value) && value.includes(option.value))
-    : [];
+  const selectedOptions = options.filter((option) => value.includes(option.value));
+  const canSelectMore = !maxSelect || value.length < maxSelect;
 
   const handleSelect = (optionValue: any) => {
-    if (multiple) {
-      const currentValues = Array.isArray(value) ? (value as (string | number)[]) : [];
-      const newValues = currentValues.includes(optionValue)
-        ? currentValues.filter((v) => v !== optionValue)
-        : [...currentValues, optionValue];
+    if (value.includes(optionValue)) {
+      // Remove from selection
+      const newValues = value.filter((v) => v !== optionValue);
       onChange?.(newValues);
-    } else {
-      onChange?.(optionValue);
-      setIsOpen(false);
+    } else if (canSelectMore) {
+      // Add to selection
+      const newValues = [...value, optionValue];
+      onChange?.(newValues);
     }
+  };
+
+  const handleRemove = (optionValue: any) => {
+    const newValues = value.filter((v) => v !== optionValue);
+    onChange?.(newValues);
   };
 
   const handleBlur = () => {
     onBlur?.(value);
-    setTimeout(() => setIsOpen(false), 200); // Delay to allow click events
+    setTimeout(() => setIsOpen(false), 200);
   };
 
   const handleFocus = () => {
@@ -62,8 +64,39 @@ const SelectField: React.FC<SelectFieldProps> = ({
       <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
+        {maxSelect && (
+          <span className="text-gray-500 text-xs ml-2">
+            ({value.length}/{maxSelect})
+          </span>
+        )}
       </label>
 
+      {/* Selected items */}
+      {selectedOptions.length > 0 && (
+        <div className="mb-2 flex flex-wrap gap-1">
+          {selectedOptions.map((option) => (
+            <span
+              key={option.value}
+              className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              {option.label}
+              <button
+                type="button"
+                onClick={() => handleRemove(option.value)}
+                className="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full hover:bg-blue-200">
+                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fillRule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Dropdown */}
       <div className="relative">
         <button
           type="button"
@@ -79,11 +112,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
           `}
           aria-describedby={error ? `${name}-error` : undefined}>
           <span className="block truncate">
-            {multiple
-              ? selectedOptions.length > 0
-                ? `${selectedOptions.length} مورد انتخاب شده`
-                : placeholder
-              : selectedOption?.label || placeholder}
+            {selectedOptions.length === 0 ? placeholder : `${selectedOptions.length} مورد انتخاب شده`}
           </span>
           <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
             <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,38 +137,33 @@ const SelectField: React.FC<SelectFieldProps> = ({
 
             <div className="max-h-60 overflow-auto">
               {filteredOptions.length > 0 ? (
-                filteredOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => handleSelect(option.value)}
-                    className={`
-                      w-full px-3 py-2 text-left text-sm hover:bg-blue-50 focus:outline-none focus:bg-blue-50
-                      ${multiple && Array.isArray(value) && value.includes(option.value) ? "bg-blue-100" : ""}
-                      ${!multiple && value === option.value ? "bg-blue-100" : ""}
-                    `}>
-                    <div className="flex items-center">
-                      {multiple && (
+                filteredOptions.map((option) => {
+                  const isSelected = value.includes(option.value);
+                  const isDisabled = !isSelected && !canSelectMore;
+
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => handleSelect(option.value)}
+                      disabled={isDisabled}
+                      className={`
+                        w-full px-3 py-2 text-left text-sm focus:outline-none
+                        ${isSelected ? "bg-blue-100 text-blue-800" : "hover:bg-gray-50"}
+                        ${isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                      `}>
+                      <div className="flex items-center">
                         <input
                           type="checkbox"
-                          checked={Array.isArray(value) && value.includes(option.value)}
+                          checked={isSelected}
                           onChange={() => {}} // Handled by button click
                           className="mr-2"
                         />
-                      )}
-                      {!multiple && value === option.value && (
-                        <svg className="w-4 h-4 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                          <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      )}
-                      {option.label}
-                    </div>
-                  </button>
-                ))
+                        {option.label}
+                      </div>
+                    </button>
+                  );
+                })
               ) : (
                 <div className="px-3 py-2 text-sm text-gray-500">
                   {searchTerm ? "نتیجه‌ای یافت نشد" : "گزینه‌ای موجود نیست"}
@@ -161,4 +185,4 @@ const SelectField: React.FC<SelectFieldProps> = ({
   );
 };
 
-export default SelectField;
+export default MultiSelectField;
