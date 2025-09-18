@@ -1,5 +1,12 @@
 import React from "react";
 import type { TextFieldType } from "../../Types/fields.types";
+import {
+  getFieldContainerStyles,
+  getLabelStyles,
+  getInputStyles,
+  getErrorStyles,
+  getValidationStyles,
+} from "../../utils/fieldVariants";
 
 interface TextFieldProps extends TextFieldType {
   value?: string;
@@ -18,6 +25,7 @@ const TextField: React.FC<TextFieldProps> = ({
   maxLength,
   minLength,
   className = "",
+  variant = "solid",
   onChange,
   onBlur,
   onFocus,
@@ -37,8 +45,8 @@ const TextField: React.FC<TextFieldProps> = ({
   };
 
   return (
-    <div className={`form-field ${className}`}>
-      <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">
+    <div className={getFieldContainerStyles(variant, className)}>
+      <label htmlFor={name} className={getLabelStyles(variant)}>
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
@@ -59,21 +67,17 @@ const TextField: React.FC<TextFieldProps> = ({
         onChange={handleChange}
         onBlur={handleBlur}
         onFocus={handleFocus}
-        className={`
-          w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-          ${error ? "border-red-500" : "border-gray-300"}
-          ${disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white"}
-        `}
+        className={getInputStyles(variant, error, disabled)}
         aria-describedby={error ? `${name}-error` : undefined}
       />
 
       {error && (
-        <p id={`${name}-error`} className="mt-1 text-sm text-red-600">
+        <p id={`${name}-error`} className={getErrorStyles(variant)}>
           {error}
         </p>
       )}
 
-      {validation?.message && !error && <p className="mt-1 text-sm text-gray-500">{validation.message}</p>}
+      {validation?.message && !error && <p className={getValidationStyles(variant)}>{validation.message}</p>}
     </div>
   );
 };

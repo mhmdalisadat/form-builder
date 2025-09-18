@@ -10,52 +10,38 @@ import CheckboxField from "./CheckboxField";
 import DateField from "./DateField";
 import FileField from "./FileField";
 
-interface FieldRendererProps {
-  field: FormFieldType;
-  value?: any;
-  error?: string;
-  touched?: boolean;
-}
-
-const FieldRenderer: React.FC<FieldRendererProps> = ({ field, value, error, touched }) => {
-  const commonProps = {
-    ...field,
-    value,
-    error: touched && error ? error : undefined,
-  };
-
+const FieldRenderer: React.FC<{ field: FormFieldType }> = ({ field }) => {
   switch (field.type) {
     case "text":
     case "email":
     case "password":
-      return <TextField {...commonProps} type={field.type} />;
+      return <TextField {...field} />;
 
     case "number":
-      return <NumberField {...commonProps} type="number" />;
+      return <NumberField {...field} />;
 
     case "textarea":
-      return <TextAreaField {...commonProps} type="textarea" />;
+      return <TextAreaField {...field} />;
 
     case "select":
-      return <SelectField {...commonProps} type="select" />;
+      return <SelectField {...field} />;
 
     case "multiSelect":
-      return <MultiSelectField {...commonProps} type="multiSelect" />;
+      return <MultiSelectField {...field} />;
 
     case "radio":
-      return <RadioField {...commonProps} type="radio" />;
+      return <RadioField {...field} />;
 
     case "checkbox":
-      return <CheckboxField {...commonProps} type="checkbox" />;
+      return <CheckboxField {...field} />;
 
     case "date":
-      return <DateField {...commonProps} type="date" />;
+      return <DateField {...field} />;
 
     case "file":
-      return <FileField {...commonProps} type="file" />;
+      return <FileField {...field} />;
 
     default:
-      console.warn(`Unknown field type: ${(field as any).type}`);
       return null;
   }
 };

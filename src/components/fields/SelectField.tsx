@@ -1,5 +1,13 @@
 import React, { useState } from "react";
 import type { SelectFieldType } from "../../Types/fields.types";
+import { cn } from "../../utils/cn";
+import {
+  getFieldContainerStyles,
+  getLabelStyles,
+  getSelectStyles,
+  getErrorStyles,
+  getValidationStyles,
+} from "../../utils/fieldVariants";
 
 interface SelectFieldProps extends SelectFieldType {
   value?: string | number;
@@ -18,6 +26,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
   multiple = false,
   searchable = false,
   className = "",
+  variant = "solid",
   onChange,
   onBlur,
   onFocus,
@@ -35,7 +44,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
     ? options.filter((option) => Array.isArray(value) && value.includes(option.value))
     : [];
 
-  const handleSelect = (optionValue: any) => {
+  const handleSelect = (optionValue: string | number) => {
     if (multiple) {
       const currentValues = Array.isArray(value) ? (value as (string | number)[]) : [];
       const newValues = currentValues.includes(optionValue)
@@ -58,8 +67,8 @@ const SelectField: React.FC<SelectFieldProps> = ({
   };
 
   return (
-    <div className={`form-field ${className}`}>
-      <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">
+    <div className={getFieldContainerStyles(variant, className)}>
+      <label htmlFor={name} className={getLabelStyles(variant)}>
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
@@ -71,12 +80,11 @@ const SelectField: React.FC<SelectFieldProps> = ({
           onBlur={handleBlur}
           onFocus={handleFocus}
           disabled={disabled}
-          className={`
-            w-full px-3 py-2 text-left border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-            ${error ? "border-red-500" : "border-gray-300"}
-            ${disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white cursor-pointer"}
-            ${isOpen ? "ring-2 ring-blue-500 border-blue-500" : ""}
-          `}
+          className={cn(
+            getSelectStyles(variant, error, disabled),
+            "text-left cursor-pointer",
+            isOpen && "ring-2 ring-blue-500 border-blue-500"
+          )}
           aria-describedby={error ? `${name}-error` : undefined}>
           <span className="block truncate">
             {multiple
@@ -151,12 +159,12 @@ const SelectField: React.FC<SelectFieldProps> = ({
       </div>
 
       {error && (
-        <p id={`${name}-error`} className="mt-1 text-sm text-red-600">
+        <p id={`${name}-error`} className={getErrorStyles(variant)}>
           {error}
         </p>
       )}
 
-      {validation?.message && !error && <p className="mt-1 text-sm text-gray-500">{validation.message}</p>}
+      {validation?.message && !error && <p className={getValidationStyles(variant)}>{validation.message}</p>}
     </div>
   );
 };

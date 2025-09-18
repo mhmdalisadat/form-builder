@@ -1,8 +1,8 @@
 import { Formik, type FormikHelpers } from "formik";
 import * as yup from "yup";
-import type { FormFieldType } from "../Types/formBuilder";
-import NumberField from "./fields/NumberField";
+import type { FormFieldType } from "../Types/fields.types";
 import type { IColumnsConfig, ICustomInputs, IFormErrors, ISubmitButtonProps } from "../Types";
+import FieldRenderer from "./fields/FieldRenderer";
 
 const validationSchema = yup.object({
   username: yup.string().min(2, "Username must be at least 2 characters."),
@@ -45,7 +45,11 @@ const FormBuilder: React.FC<FormBuilderProps> = ({
         }
       }}>
       {() => (
-        <>{formFields.map((field) => (field.type === "number" ? <NumberField key={field.name} {...field} /> : null))}</>
+        <form>
+          {formFields.map((field) => (
+            <FieldRenderer key={field.name} field={field} />
+          ))}
+        </form>
       )}
     </Formik>
   );

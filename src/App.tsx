@@ -1,11 +1,11 @@
-import UserRegistrationForm from "./examples/UserRegistrationForm";
+import Example from "./examples/Example";
 
 function App() {
-    return (
-        <div className="min-h-screen bg-gray-100 py-8">
-            <UserRegistrationForm />
-        </div>
-    );
+  return (
+    <div className="min-h-screen py-8">
+      <Example />
+    </div>
+  );
 }
 
 export default App;
