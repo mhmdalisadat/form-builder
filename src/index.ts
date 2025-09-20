@@ -20,7 +20,4 @@ export { default as FieldRenderer } from "./components/fields/FieldRenderer";
 // export { default as AttachmentField } from "./components/fields/AttachmentField";
 
 // Types
-export * from "./Types/fields.types";
-
-// Utilities
-export * from "./utils/validationSchemas";
+export type { FormFieldType } from "./Types/fields.types";

@@ -1,7 +1,7 @@
 import { Formik, type FormikHelpers } from "formik";
 import * as yup from "yup";
 import type { FormFieldType } from "../Types/fields.types";
-import type { IColumnsConfig, ICustomInputs, IFormErrors, ISubmitButtonProps } from "../Types";
+import type { IColumnsConfig, ICustomInputs, IFormErrors, ISubmitButtonProps } from "../Types/frombuilder.types";
 import FieldRenderer from "./fields/FieldRenderer";
 
 const validationSchema = yup.object({
